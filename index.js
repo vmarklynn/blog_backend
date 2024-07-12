@@ -1,4 +1,5 @@
 const { MONGODB_URI, PORT } = require('./utils/config')
+const { requestLogger, unknownEndpoint, validationError } = require('./utils/middleware.js')
 const { info, error } = require('./utils/logger')
 const express = require('express')
 const blogsRouter = require('./controllers/blogs')
@@ -15,8 +16,12 @@ mongoose.connect(MONGODB_URI).then(result => {
 
 app.use(cors())
 app.use(express.json())
+app.use(requestLogger)
 
 app.use('/api/blogs', blogsRouter)
+
+app.use(validationError)
+app.use(unknownEndpoint)
 
 app.listen(PORT || 3001, () => {
   info(`Server running on port ${PORT}`)
