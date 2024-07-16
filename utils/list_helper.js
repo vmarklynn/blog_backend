@@ -12,4 +12,18 @@ const totalLikes = (blogs) => {
   return result
 }
 
-module.exports = { dummy, totalLikes }
+const favoriteBlog = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+  let currentMax = blogs[0]
+  for (let i = 1; i < blogs.length; i++) {
+    if (currentMax.likes < blogs[i].likes) {
+      currentMax = blogs[i]
+    }
+  }
+
+  return currentMax
+}
+
+module.exports = { dummy, totalLikes, favoriteBlog }
