@@ -87,6 +87,22 @@ test('blogs have the field id as identifiers', async () => {
   assert.strictEqual(!('_id' in firstBlog), true)
 })
 
+test('POST requests should work as expected', async () => {
+  const testPost =
+  {
+    title: "Quit School",
+    author: "Primeagen",
+    url: "www.primeagen.com",
+    likes: 2,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(testPost)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
