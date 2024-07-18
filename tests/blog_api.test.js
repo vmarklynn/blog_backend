@@ -101,7 +101,13 @@ test('POST requests should work as expected', async () => {
     .send(testPost)
     .expect(201)
     .expect('Content-Type', /application\/json/)
+
+  // TODO: Refactor to helpers
+  const blogsInDb = await Blog.find({})
+  assert.strictEqual(blogsInDb.length, blogs.length + 1)
 })
+
+test('POST requests increase the number of ')
 
 after(async () => {
   await mongoose.connection.close()
