@@ -97,6 +97,19 @@ test('POST requests with empty like will default to 0 ', async () => {
   assert.strictEqual(response.body[blogs.length].likes, 0)
 })
 
+test('POST requests with invalid requests should return 400', async () => {
+
+  const testInvalidPost =
+  {
+    url: "www.primeagen.com",
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(testInvalidPost)
+    .expect(400)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
