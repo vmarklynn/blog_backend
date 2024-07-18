@@ -80,6 +80,13 @@ test('blogs return the correct number of blogs', async () => {
   assert.strictEqual(response.body.length, 6)
 })
 
+test('blogs have the field id as identifiers', async () => {
+  const response = await api.get('/api/blogs')
+  const firstBlog = response.body[0]
+  assert.strictEqual('id' in firstBlog, true)
+  assert.strictEqual(!('_id' in firstBlog), true)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
