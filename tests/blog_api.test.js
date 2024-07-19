@@ -110,6 +110,16 @@ test('POST requests with invalid requests should return 400', async () => {
     .expect(400)
 })
 
+test('DELETE request with a valid id should return a 204', async () => {
+  const idToDelete = blogs[0]._id
+
+  console.log(idToDelete)
+
+  await api
+    .delete(`/api/blogs/${idToDelete}`)
+    .expect(204)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
