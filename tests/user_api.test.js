@@ -21,6 +21,45 @@ describe('when there are users in the database', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
   })
+
+  test('invalid password post will return a 400 HTTP Bad Request', async () => {
+    const invalidRequest = {
+      name: "Vincent",
+      username: "v1234",
+      password: "1"
+    }
+
+    await api
+      .post('/api/users')
+      .send(invalidRequest)
+      .expect(400)
+  })
+
+  test('valid User posts will be in MongoDB', async () => {
+    const validRequest = {
+      name: "Vincent",
+      username: "v12345",
+      password: "123"
+    }
+
+    await api
+      .post('/api/users')
+      .send(validRequest)
+      .expect(201)
+  })
+
+  test('duplicate usernames will return a 400', async () => {
+    const invalidRequest = {
+      name: "Vincent",
+      username: "vincent@gmail.com",
+      password: "12345678"
+    }
+
+    await api
+      .post('/api/users')
+      .send(invalidRequest)
+      .expect(400)
+  })
 })
 
 after(async () => {
