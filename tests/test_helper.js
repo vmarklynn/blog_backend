@@ -1,5 +1,18 @@
 const Blog = require("../models/blog")
+const User = require("../models/user")
 
+const initialUsers = [
+  {
+    name: "Vincent",
+    username: "vincent@gmail.com",
+    password: "12345678"
+  },
+  {
+    name: "Jimmy",
+    username: "jimmy@gmail.com",
+    password: "12345678"
+  }
+]
 
 const initialBlogs = [
   {
@@ -22,8 +35,12 @@ const initialBlogs = [
 
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
-
   return blogs
 }
 
-module.exports = { initialBlogs, blogsInDb }
+const usersInDb = async () => {
+  const users = await User.find({})
+  return users
+}
+
+module.exports = { initialBlogs, blogsInDb, initialUsers, usersInDb }
