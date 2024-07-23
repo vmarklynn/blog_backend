@@ -19,8 +19,10 @@ const validationError = (error, request, response, next) => {
     return response.status(400).send({ error: error.message })
   } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
     return response.status(400).send({ error: 'username needs to be unique' })
-  } else if (error.name === 'JsonWebTokenEror') {
+  } else if (error.name === 'JsonWebTokenError') {
     return response.status(401).send({ error: 'invalid token' })
+  } else if (error.name === 'TokenExpiredError') {
+    return response.status(401).send({ error: 'expired token' })
   }
 
   next(error)
