@@ -11,8 +11,6 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
-  console.log(request.token)
-
   const decodedToken = jwt.verify(request.token, process.env.SECRET)
 
   if (!decodedToken.id) {
@@ -37,7 +35,22 @@ blogsRouter.post('/', async (request, response, next) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndDelete(request.params.id)
+  //TODO: Add token identification for this.
+  // Only a user that created the blog is allowed to delete
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).send({ error: 'unauthorized user' })
+  }
+
+  const blogToDelete = await Blog.findById(request.params.id)
+
+  if (decodedToken.id.toString() === blogToDelete.user.toString()) {
+    await Blog.findByIdAndDelete(request.params.id)
+  }
+  else {
+    return response.status(401).send({ error: 'unauthorized user' })
+  }
+
   response.status(204).end()
 })
 
