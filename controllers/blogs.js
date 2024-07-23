@@ -1,6 +1,17 @@
 const blogsRouter = require('express').Router()
+const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+
+const tokenHelper = request => {
+  // Headers are always capitalized
+  const authorization = request.get('Authorization')
+  // Will return Bearer 'TOKEN'
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null
+}
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -10,9 +21,14 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
 
+  const decodedToken = jwt.verify(tokenHelper(request), process.env.SECRET)
+
+  if (!decodedToken.id) {
+    return response.status(401).send({ error: 'unauthorized user' })
+  }
+
   // TODO: This is a rudimentary implementation that ALWAYS grabs the first user
-  const users = await User.find({})
-  const userToUpdate = users[0]
+  const userToUpdate = await User.findById(decodedToken.id)
 
   const blog = new Blog({
     title: body.title,
