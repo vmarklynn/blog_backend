@@ -24,12 +24,22 @@ const validationError = (error, request, response, next) => {
   } else if (error.name === 'TokenExpiredError') {
     return response.status(401).send({ error: 'expired token' })
   }
-
   next(error)
+}
+
+const tokenExtractor = (request, response, next) => {
+  // Headers are always capitalized
+  const authorization = request.get('authorization')
+  // Will return Bearer 'TOKEN'
+  if (authorization && authorization.startsWith('Bearer ')) {
+    request.token = authorization.replace('Bearer ', '')
+  }
+  next()
 }
 
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  validationError
+  validationError,
+  tokenExtractor
 }

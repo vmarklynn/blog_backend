@@ -3,15 +3,6 @@ const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
-const tokenHelper = request => {
-  // Headers are always capitalized
-  const authorization = request.get('Authorization')
-  // Will return Bearer 'TOKEN'
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '');
-  }
-  return null
-}
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -20,14 +11,14 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
+  console.log(request.token)
 
-  const decodedToken = jwt.verify(tokenHelper(request), process.env.SECRET)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
 
   if (!decodedToken.id) {
     return response.status(401).send({ error: 'unauthorized user' })
   }
 
-  // TODO: This is a rudimentary implementation that ALWAYS grabs the first user
   const userToUpdate = await User.findById(decodedToken.id)
 
   const blog = new Blog({
@@ -43,7 +34,6 @@ blogsRouter.post('/', async (request, response, next) => {
   await userToUpdate.save()
 
   response.status(201).json(savedBlog)
-
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
@@ -63,7 +53,6 @@ blogsRouter.put('/:id', async (request, response) => {
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true })
 
   response.json(updatedBlog)
-
 })
 
 module.exports = blogsRouter
