@@ -11,40 +11,28 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).send({ error: 'unauthorized user' })
-  }
-
-  const userToUpdate = await User.findById(decodedToken.id)
+  const user = request.user
 
   const blog = new Blog({
     title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes,
-    user: userToUpdate.id
+    user: user.id
   })
 
   const savedBlog = await blog.save()
-  userToUpdate.blogs = userToUpdate.blogs.concat(savedBlog._id)
-  await userToUpdate.save()
+  user.blogs = user.blogs.concat(savedBlog._id)
+  await user.save()
 
   response.status(201).json(savedBlog)
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-  //TODO: Add token identification for this.
-  // Only a user that created the blog is allowed to delete
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).send({ error: 'unauthorized user' })
-  }
-
+  const user = request.user
   const blogToDelete = await Blog.findById(request.params.id)
 
-  if (decodedToken.id.toString() === blogToDelete.user.toString()) {
+  if (user.id.toString() === blogToDelete.user.toString()) {
     await Blog.findByIdAndDelete(request.params.id)
   }
   else {

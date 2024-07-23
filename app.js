@@ -1,5 +1,5 @@
 const { MONGODB_URI } = require('./utils/config')
-const { requestLogger, unknownEndpoint, validationError, tokenExtractor } = require('./utils/middleware.js')
+const { requestLogger, unknownEndpoint, validationError, tokenExtractor, userExtractor } = require('./utils/middleware.js')
 const { info, error } = require('./utils/logger')
 const express = require('express')
 require('express-async-errors')
@@ -21,9 +21,9 @@ app.use(express.json())
 app.use(requestLogger)
 app.use(tokenExtractor)
 
-app.use('/api/login', loginRouter)
-app.use('/api/blogs', blogsRouter)
+app.use('/api/blogs', userExtractor, blogsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 app.use(validationError)
 app.use(unknownEndpoint)
