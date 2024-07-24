@@ -1,6 +1,7 @@
 const { test, after, beforeEach, describe } = require('node:test')
 const Blog = require('../models/blog')
-const { initialBlogs, blogsInDb } = require('./test_helper')
+const User = require('../models/user')
+const { initialBlogs, initialUsers, blogsInDb, usersInDb } = require('./test_helper')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
@@ -41,6 +42,15 @@ describe('when there are existing notes', () => {
   describe('addition of new blogs', () => {
 
     test('works with valid blog', async () => {
+      const demoUserLogin = { username: "john@gmail.com", password: "12345678" }
+      await api.post('/api/users').send(demoUserLogin)
+
+      const request = await api.post('/api/login').send(demoUserLogin)
+      const token = request.body.token
+
+      console.log('TOKEN: ', token)
+      console.log('-------------------------------------------------------------------------------------------------------------')
+
       const testPost =
       {
         title: "Quit School",
@@ -51,15 +61,24 @@ describe('when there are existing notes', () => {
 
       await api
         .post('/api/blogs')
+        .set('authorization', `Bearer ${token}`)
         .send(testPost)
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
       const response = await blogsInDb()
+
       assert.strictEqual(response.length, initialBlogs.length + 1)
     })
 
     test('empty like will default to 0 ', async () => {
+
+      const demoUserLogin = { username: initialUsers[0].username, password: initialUsers[0].password }
+      await api.post('/api/users').send(demoUserLogin)
+
+      const request = await api.post('/api/login').send(demoUserLogin)
+      const token = request.body.token
+
       const testPost =
       {
         title: "Quit School",
@@ -69,6 +88,7 @@ describe('when there are existing notes', () => {
 
       await api
         .post('/api/blogs')
+        .set('authorization', `Bearer ${token}`)
         .send(testPost)
         .expect(201)
 
@@ -80,6 +100,12 @@ describe('when there are existing notes', () => {
 
     test('with invalid requests should return 400', async () => {
 
+      const demoUserLogin = { username: initialUsers[0].username, password: initialUsers[0].password }
+      await api.post('/api/users').send(demoUserLogin)
+
+      const request = await api.post('/api/login').send(demoUserLogin)
+      const token = request.body.token
+
       const testInvalidPost =
       {
         url: "www.primeagen.com",
@@ -87,6 +113,7 @@ describe('when there are existing notes', () => {
 
       await api
         .post('/api/blogs')
+        .set('authorization', `Bearer ${token}`)
         .send(testInvalidPost)
         .expect(400)
     })
@@ -95,10 +122,31 @@ describe('when there are existing notes', () => {
   describe('Deletion of blog', () => {
 
     test('valid id should return a 204', async () => {
-      const idToDelete = initialBlogs[0]._id
+      const demoUserLogin = { username: initialUsers[0].username, password: initialUsers[0].password }
+      await api.post('/api/users').send(demoUserLogin)
+
+      const request = await api.post('/api/login').send(demoUserLogin)
+      const token = request.body.token
+
+      const testPost =
+      {
+        title: "Quit School",
+        author: "Primeagen",
+        url: "www.primeagen.com",
+        likes: 2,
+      }
+
+      await api.post('/api/blogs').set('authorization', `Bearer ${token}`)
+        .send(testPost)
+
+
+      const getRequest = await api.get('/api/blogs')
+      const blogs = getRequest.body
+      const idToDelete = blogs[blogs.length - 1].id
 
       await api
         .delete(`/api/blogs/${idToDelete}`)
+        .set('authorization', `Bearer ${token}`)
         .expect(204)
     })
   })
@@ -125,6 +173,7 @@ describe('when there are existing notes', () => {
 })
 
 after(async () => {
+  await User.deleteMany({})
   await mongoose.connection.close()
 })
 

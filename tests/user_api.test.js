@@ -3,8 +3,7 @@ const app = require('../app')
 const supertest = require('supertest')
 const User = require('../models/user')
 const { beforeEach, describe, test, after } = require('node:test')
-const { assert } = require('node:assert')
-const { initialUsers, usersInDb } = require('./test_helper')
+const { initialUsers } = require('./test_helper')
 
 const api = supertest(app)
 
@@ -63,5 +62,6 @@ describe('when there are users in the database', () => {
 })
 
 after(async () => {
+  await User.deleteMany({})
   await mongoose.connection.close()
 })
