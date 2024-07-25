@@ -68,6 +68,22 @@ describe('when there are existing notes', () => {
       assert.strictEqual(response.length, initialBlogs.length + 1)
     })
 
+    test('fails without login', async () => {
+
+      const testPost =
+      {
+        title: "Quit School",
+        author: "Primeagen",
+        url: "www.primeagen.com",
+        likes: 2,
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(testPost)
+        .expect(401)
+    })
+
     test('empty like will default to 0 ', async () => {
 
       const demoUserLogin = { username: initialUsers[0].username, password: initialUsers[0].password }
