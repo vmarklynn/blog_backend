@@ -48,9 +48,6 @@ describe('when there are existing notes', () => {
       const request = await api.post('/api/login').send(demoUserLogin)
       const token = request.body.token
 
-      console.log('TOKEN: ', token)
-      console.log('-------------------------------------------------------------------------------------------------------------')
-
       const testPost =
       {
         title: "Quit School",
